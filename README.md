@@ -5,3 +5,6 @@ An AI-driven business automation framework that connects inbound triggers, prosp
 - A prospecting sub-agent finds qualified leads online and predicts likely contact emails. The results are then passed into CRM creation and outreach flows.
 - Lead data is structured and pushed into Pipedrive, while an SDR sub-agent drafts outbound emails in Gmail. This creates a cleaner handoff from lead discovery to sales outreach.
 - Additional sub-agents handle deal creation, demo booking, calendar checks, and notifications. This makes the system flexible for RevOps, sales, and business development use cases.
+
+### Tech Stack:
+n8n, OpenAI API, ElevenLabs, Pipedrive, Google Workspace, Firecrawl, Hunter, Discord
