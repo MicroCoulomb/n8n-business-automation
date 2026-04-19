@@ -1,0 +1,210 @@
+{
+  "name": "prospecting_subagent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You find sales prospects based on a specific query from the user. You use your tools to search the internet and scrape websites as necessary to find the best potential clients for the user. And also use your tools to find the most likely email address for the prospect. Respond with 3 sales prospect",
+          "maxIterations": 30
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "f28db27c-1778-49e8-81c6-63bd87065c17",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        208
+      ],
+      "id": "4ed7ede6-656b-4f0f-9fbf-b73ad645410a",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "i55ITk3OwxWO9tHC",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        176,
+        208
+      ],
+      "id": "3c12f985-259b-4f7c-83b1-511ce287497e",
+      "name": "Simple Memory",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"prospects\" : [\n      {\n        \"firstname\" : \"prospect's first name\",\n        \"lastname\" : \"their last name\",\n        \"company\" : \"where they work\",\n        \"role\" : \"what they do\",\n        \"email\" : \"email address for this prospect\",\n        \"rationale\" : \"why this prospect is qualified as a potential client\"\n      }\n    ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        720,
+        208
+      ],
+      "id": "2fa3780e-7120-48be-9995-2e82eccb7fea",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.firecrawl.dev/fc-3710a805bb61492e96fe7b5d5a15ffcd/v2/mcp",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        208
+      ],
+      "id": "c9f44204-7943-4ea8-a62c-202e40d3073f",
+      "name": "Firecrawl"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.hunter.io/mcp",
+        "authentication": "bearerAuth",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        208
+      ],
+      "id": "6ef0f075-4a93-4d70-bacb-8659fb3dc553",
+      "name": "Hunter",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "M6pP1q7H8uxUyv5b",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -48,
+        0
+      ],
+      "id": "f444d844-acdb-4734-b155-8167c6a324de",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Firecrawl": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hunter": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "e9262a78-f096-488c-bd2c-a8885c3bfaf6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "30020108d17577bc9f86f2773ccc1de40da9c47825c4d584abc44307fec846ce"
+  },
+  "id": "1mWL0lYmPtThfcEP",
+  "tags": []
+}

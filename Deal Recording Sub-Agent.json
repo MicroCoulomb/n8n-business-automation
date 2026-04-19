@@ -1,0 +1,267 @@
+{
+  "name": "Deal Recording Sub-Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.name }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are provided with the potential name of a person in the Pipedrive database. You use your tools to see whether that person is already in the database. If there are duplicates, pick one. Reply with the details you find; a Deal will be created in Pipedrive as a result"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        112,
+        0
+      ],
+      "id": "04623046-31de-4f7a-90fb-57fd96a6aba1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        192
+      ],
+      "id": "2e3c8090-be97-416a-abbb-d08c97f66bab",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "i55ITk3OwxWO9tHC",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "person",
+        "operation": "getAll",
+        "returnAll": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.pipedriveTool",
+      "typeVersion": 1,
+      "position": [
+        208,
+        192
+      ],
+      "id": "cddfbcd3-a7ee-4e4c-af36-00fb4acb9542",
+      "name": "Get many people in Pipedrive",
+      "credentials": {
+        "pipedriveApi": {
+          "id": "4y3J76yAYOIzZpIg",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"found\": true,\n  \"id\": \"person id here\",\n  \"company\": \"company name here\",\n  \"name\": \"person name here\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        384,
+        192
+      ],
+      "id": "b653ab44-7245-4e78-ae9f-77837ca20cde",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4423b2b8-fa79-40bc-bc94-ce03fc3980a4",
+              "leftValue": "={{  $json.output.found }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        592,
+        0
+      ],
+      "id": "4f19b7d5-7684-437c-972b-e1cc95e82f87",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "title": "={{ $json.output.name }} Deal",
+        "associateWith": "person",
+        "person_id": "={{ $json.output.id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.pipedrive",
+      "typeVersion": 1,
+      "position": [
+        832,
+        -16
+      ],
+      "id": "6b0da7b9-a81b-4fc7-98ce-7612989c3e1f",
+      "name": "Create a deal",
+      "credentials": {
+        "pipedriveApi": {
+          "id": "4y3J76yAYOIzZpIg",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "c7aa3694-9123-4bf0-b308-fd575f657269",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -240,
+        0
+      ],
+      "id": "d99321b0-0089-49bc-aa5f-bb0060b7766f",
+      "name": "Webhook",
+      "webhookId": "c7aa3694-9123-4bf0-b308-fd575f657269"
+    },
+    {
+      "parameters": {
+        "content": "## Find in Pipedrive",
+        "height": 464,
+        "width": 576
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -48,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "c86eab1f-7177-4bed-9198-8229ae362d8f",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Record a Deal",
+        "height": 464,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        560,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "3634eaa7-818e-47a0-8e21-83a4cadfb8bb",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many people in Pipedrive": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create a deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "ecae49ff-72c1-4db3-a391-e298bf10fd4d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "30020108d17577bc9f86f2773ccc1de40da9c47825c4d584abc44307fec846ce"
+  },
+  "id": "TrLRanbPUd8IQWQA",
+  "tags": []
+}
